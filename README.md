@@ -19,6 +19,7 @@ The cases will be written in the following languages:
 - Mojo
 - C++
 - Haskell
+- Julia
 - ... (hence the $N$)
 
 The object-oriented approach will always target the following classes:
@@ -31,4 +32,24 @@ The functional approach will always target the following functions:
 - `create_dataset`: for creating the dataset
 - `define_model`: for mathematically defining the neural network model
 - `train_model`: for training the model
+  - `forward_pass`: for the forward pass
+  - `backward_pass`: for the backward pass
 - `evaluate_model`: for evaluating the model
+
+# Learning goals
+
+- Implement back propagation code from scratch - that is: no using external backpropagation libraries like TensorFlow or PyTorch for now.
+- Understand the implementation differences between object-oriented and functional programming paradigms.
+- Understand how well chatbot LLMs can work as "junior coding partners" for someone with a good understanding of the underlying deep learning principles and deep familiary with at least one langugage (i.e. python).
+- Tightly integrate an LLM into the code development and integration pipeline.
+
+# Scorecard
+
+| language | accuracy | runtime  | dev time | readability |
+|----------|----------|----------|----------|-------------|
+| python   | ?        | ?        | ?        | ?           |
+| mojo     | ?        | ?        | ?        | ?           |
+| c++      | ?        | ?        | ?        | ?           |
+| haskell  | ?        | ?        | ?        | ?           |
+| julia    | ?        | ?        | ?        | ?           |
+| ...      | ...      | ?        | ?        | ?           |
