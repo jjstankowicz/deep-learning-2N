@@ -4,9 +4,9 @@ The goal is to write deep learning code from scratch (i.e. no external libraries
 
 The task is always image classification on MNIST data.
 
-There will be $2 \times N $ cases,
+There will be $ 2 \times N $ cases,
 where $N$ is some to-be-determined number of programming languages
-and $2$ endoces the number of paradigms (object-oriented and functional).
+and $2$ counts the number of paradigms (object-oriented and functional).
 
 ChatGPT will be used to generate the code.
 To estimate the time, the author will tag git commits with "start" and "end" tags
