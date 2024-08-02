@@ -1,0 +1,17 @@
+user_input: >
+ I will request you to write code below.
+ The response you write will be passed directly
+ into the code interpreter or compiler.
+ So do not include any comments or unnecessary
+ text in the response. Comments can be included.
+ Do not include example usage.
+
+ Request code:
+ ```
+ Create functional programming python code
+ that performs matrix multiplication without
+ performing calling any external library such
+ as numpy. Include type hints in the function
+ and a docstring that explains the function.
+ ```
+output_tag: python/functional/matrix_multiply
