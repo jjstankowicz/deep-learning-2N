@@ -21,4 +21,4 @@ user_input: >
  Make sure the test covers all allowed types.
 code_path: python/functional/methods/matrix_multiply.py
 output_tag: python/functional/methods/test_matrix_multiply.py
-model_name: "gpt-4o"
+model_name: claude-3-5-sonnet-20240620

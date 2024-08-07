@@ -42,4 +42,4 @@ user_input: >
  instead of lambda functions.
  ```
 output_tag: python/functional/methods/matrix_multiply
-model_name: gpt-4o
+model_name: claude-3-5-sonnet-20240620
