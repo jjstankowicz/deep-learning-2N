@@ -1,0 +1,45 @@
+user_input: >
+ I will request you to write code below.
+ The response you write will be passed directly
+ into the code interpreter or compiler.
+ So do not include any unnecessary text in the response.
+ Comments can be included.
+ Do not include example usage.
+
+ You can use a "scratchpad" at the top of your response
+ to reason through the answer before writing the code.
+ Every line in the scratchpad should be commented out.
+ In your scratchpad, be sure to indicate what you are not
+ allowed to do in the code, based on the request.
+ You should write a first draft of the code in the scratchpad.
+ Then look for any errors or improvements or ways to increase
+ legibility. Make those changes in the code below the scratchpad.
+
+ Requested code:
+ ```
+ Create functional programming python code
+ that performs matrix multiplication.
+ The methods in the code must all be pure functions.
+ This means you cannot use the following:
+ - `for` loops
+ - `while` loops
+ - list comprehensions 
+ Instead of simple list comprehensions like
+ `[f(i) for i in range(N)]`,
+  you should use higher order functions like
+ `list(map(lambda i: f(i), range(N)))`
+ Do not call any external libraries such
+ as numpy. For any methods you create,
+ include type hints and docstrings.
+ You should define and use easily-readable Types.
+ For example:
+ TensorData = Union[int, float]
+ Tensor1D = List[TensorData]
+ Tensor2D = List[List[TensorData]]
+ and so on as necessary.
+ Raise value errors for invalid inputs.
+ To improve legibility, use named functions
+ instead of lambda functions.
+ ```
+output_tag: python/functional/methods/matrix_multiply
+model_name: gpt-4o

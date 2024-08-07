@@ -1,0 +1,24 @@
+user_input: >
+ You will receive code below.
+ You must write unittests for the code.
+
+ You must use a "scratchpad" at the top of your response
+ to reason through the answer before writing the code.
+ Every line in the scratchpad should be commented out.
+ In your scratchpad, be sure to indicate what you are not
+ allowed to do in the code, based on the request.
+ You should write a first draft of the code in the scratchpad
+ that is commented out.
+ Then look at your first draft for any errors or improvements
+ to legibility or places where you did not follow instructions
+ and make corrections for the final code below the scratchpad.
+
+ Requested code:
+ ```python
+ {{ CODE_HERE }}
+ ```
+ Use pytest.
+ Make sure the test covers all allowed types.
+code_path: python/functional/methods/matrix_multiply.py
+output_tag: python/functional/methods/test_matrix_multiply.py
+model_name: "gpt-4o"
