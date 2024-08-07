@@ -1,5 +1,4 @@
 import os
-from typing import Union
 from enum import Enum
 from openai import OpenAI
 from anthropic import Anthropic
@@ -7,160 +6,131 @@ from dl2np.utils import get_logger
 
 logger = get_logger(__name__)
 
-#
-# Chat wrapper
-#
 
+class ChatModel:
+    class OpenAIModels(Enum):
+        GPT_4O_MINI = "gpt-4o-mini"
+        GPT_4O = "gpt-4o"
+        GPT_4_TURBO = "gpt-4-turbo"
+        GPT_4 = "gpt-4"
+        GPT_35_TURBO = "gpt-35-turbo"
 
-def chat(user_input: str, model_name: str) -> str:
-    """Choose which chatbot to use based on the model_name.
+    class AnthropicModels(Enum):
+        CLAUDE_3_OPUS = "claude-3-opus-20240229"
+        CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
+        CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
+        CLAUDE_35_SONNET = "claude-3-5-sonnet-20240620"
 
-    Args:
-        user_input (str): The user input.
-        model_name (str): The model to use.
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+        self.set_model_type()
+        self.set_client()
 
-    Returns:
-        str: The response from the model.
-    """
-    if model_name.startswith("gpt"):
-        logger.info("Using OpenAI model.")
-        model = openai
-    elif model_name.startswith("claude"):
-        logger.info("Using Anthropic model.")
-        model = anthropic
-    else:
-        raise ValueError("Invalid model_name. Must start with 'gpt' or 'claude'.")
-    return model(user_input=user_input, model_name=model_name)
+    def is_openai(self) -> bool:
+        return self.model_type in self.OpenAIModels
 
+    def is_anthropic(self) -> bool:
+        return self.model_type in self.AnthropicModels
 
-def send_receive(
-    client: Union[OpenAI, Anthropic],
-    model_name: str,
-    user_input: str,
-    temperature: float,
-    max_tokens: int,
-    seed: int = 0,
-) -> str:
-    logger.debug(f"Sending user input to {model_name}: {user_input}")
+    def set_model_type(self):
+        # Match an OpenAIModels Enum to the model_name
+        if self.model_name.startswith("gpt"):
+            self.model_type = self.OpenAIModels(self.model_name)
+        # Match an AnthropicModels Enum to the model_name
+        elif self.model_name.startswith("claude"):
+            self.model_type = self.AnthropicModels(self.model_name)
+        else:
+            raise ValueError("Invalid model_name. Must start with 'gpt' or 'claude'.")
 
-    logger.info(f"Sending to {model_name}...")
-    logger.debug(f"User input: {user_input}")
+    def set_client(self):
+        if self.is_openai():
+            api_key = os.getenv("OPENAI_API_KEY")
+            self.client = OpenAI(api_key=api_key)
+        elif self.is_anthropic():
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+            self.client = Anthropic(api_key=api_key)
+        else:
+            raise ValueError("Invalid model_name.")
 
-    if isinstance(client, OpenAI):
-        message = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": user_input,
-                }
-            ],
-            model=model_name,
+    def chat(
+        self,
+        user_input: str,
+        temperature: float = 0.0,
+        seed: int = 0,
+        max_tokens: int = 4096,
+    ) -> str:
+        if self.is_openai():
+            logger.info("Using OpenAI model.")
+            return self._openai_chat(user_input, temperature, seed)
+        elif self.is_anthropic():
+            logger.info("Using Anthropic model.")
+            return self._anthropic_chat(user_input, temperature, max_tokens)
+        else:
+            raise ValueError("Invalid model_name.")
+
+    def _openai_chat(
+        self,
+        user_input: str,
+        temperature: float = 0.0,
+        seed: int = 0,
+    ) -> str:
+        return self._send_receive(
+            user_input=user_input,
             temperature=temperature,
             seed=seed,
         )
-        out = message.choices[0].message.content
-    elif isinstance(client, Anthropic):
-        message = client.messages.create(
-            model=model_name,
-            max_tokens=max_tokens,
+
+    def _anthropic_chat(
+        self,
+        user_input: str,
+        temperature: float = 0.0,
+        max_tokens: int = 4096,
+    ) -> str:
+        return self._send_receive(
+            user_input=user_input,
             temperature=temperature,
-            messages=[
-                {
-                    "role": "user",
-                    "content": user_input,
-                }
-            ],
+            max_tokens=max_tokens,
         )
-        out = message.content[0].text
-    logger.info(f"Received from {model_name}...")
-    if out is None:
-        raise ValueError("No response from the model.")
-    return out
+
+    def _send_receive(
+        self,
+        user_input: str,
+        temperature: float,
+        max_tokens: int = 4096,
+        seed: int = 0,
+    ) -> str:
+        logger.debug(f"Sending user input to {self.model_name}: {user_input}")
+
+        logger.info(f"Sending to {self.model_name}...")
+        logger.debug(f"User input: {user_input}")
+
+        if self.is_openai():
+            if not isinstance(self.client, OpenAI):
+                raise ValueError("Invalid client.")
+            message = self.client.chat.completions.create(
+                messages=[{"role": "user", "content": user_input}],
+                model=self.model_name,
+                temperature=temperature,
+                seed=seed,
+            )
+            out = message.choices[0].message.content
+        elif self.is_anthropic():
+            if not isinstance(self.client, Anthropic):
+                raise ValueError("Invalid client.")
+            message = self.client.messages.create(
+                model=self.model_name,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                messages=[{"role": "user", "content": user_input}],
+            )
+            out = message.content[0].text
+
+        logger.info(f"Received from {self.model_name}...")
+        if out is None:
+            raise ValueError("No response from the model.")
+        return out
 
 
-#
-# Open AI
-#
-
-
-class OpenAIModels(Enum):
-    GPT_4O_MINI = "gpt-4o-mini"
-    GPT_4O = "gpt-4o"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_4 = "gpt-4"
-    GPT_35_TURBO = "gpt-35-turbo"
-
-
-def openai(
-    user_input: str,
-    model_name: Union[OpenAIModels, str] = OpenAIModels.GPT_4O_MINI,
-    temperature: float = 0.0,
-    seed: int = 0,
-) -> str:
-    """Use the OpenAI API to chat with a model.
-
-    Args:
-        user_input (str): The user input.
-        model_name (OpenAIModels, optional): The model to use. Defaults to OpenAIModels.GPT_4O_MINI.value.
-        temperature (float, optional): The temperature. A temperature of 0.0 is deterministic. Defaults to 0.0.
-        seed (int, optional): The random seed. Defaults to 0.
-
-    Returns:
-        str: The response from the model.
-    """
-
-    client = OpenAI(
-        # This is the default and can be omitted
-        api_key=os.environ.get("OPENAI_API_KEY"),
-    )
-
-    if isinstance(model_name, OpenAIModels):
-        model_name = model_name.value
-
-    out = send_receive(client, model_name, user_input, temperature, seed)
-    if out is None:
-        raise ValueError("No response from the model.")
-    return out
-
-
-#
-# Anthropic
-#
-
-
-class AnthropicModels(Enum):
-    CLAUDE_3_OPUS = "claude-3-opus-20240229"
-    CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
-    CLAUDE_35_SONNET = "claude-3-5-sonnet-20240620"
-
-
-def anthropic(
-    user_input: str,
-    model_name: Union[AnthropicModels, str] = AnthropicModels.CLAUDE_3_SONNET,
-    temperature: float = 0.0,
-    max_tokens: int = 4096,
-) -> str:
-    """Use the Anthropic API to chat with a Claude model.
-
-    Args:
-        user_input (str): The user input.
-        model_name (ClaudeModels, optional): The Claude model to use. Defaults to ClaudeModels.CLAUDE_3_SONNET.
-        temperature (float, optional): The temperature. A temperature of 0.0 is deterministic. Defaults to 0.0.
-        max_tokens (int, optional): The maximum number of tokens to generate. Defaults to 1000.
-
-    Returns:
-        str: The response from the Claude model.
-    """
-
-    client = Anthropic(
-        api_key=os.environ.get("ANTHROPIC_API_KEY"),
-    )
-
-    if isinstance(model_name, AnthropicModels):
-        model_name = model_name.value
-
-    out = send_receive(client, model_name, user_input, temperature, max_tokens)
-    if out is None:
-        raise ValueError("No response from the model.")
-    return out
+def chat(user_input: str, model_name: str) -> str:
+    chat_model = ChatModel(model_name)
+    return chat_model.chat(user_input)
