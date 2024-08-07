@@ -4,6 +4,35 @@ from enum import Enum
 from openai import OpenAI
 from anthropic import Anthropic
 
+#
+# Chat wrapper
+#
+
+
+def chat(user_input: str, model_name: str) -> str:
+    """Choose which chatbot to use based on the model_name.
+
+    Args:
+        user_input (str): The user input.
+        model_name (str): The model to use.
+
+    Returns:
+        str: The response from the model.
+    """
+    if model_name.startswith("gpt"):
+        print("Using OpenAI model.")
+        model = openai
+    elif model_name.startswith("claude"):
+        print("Using Anthropic model.")
+        model = anthropic
+    else:
+        raise ValueError("Invalid model_name. Must start with 'gpt' or 'claude'.")
+    return model(user_input=user_input, model_name=model_name)
+
+
+# 
+# Open AI
+# 
 
 class OpenAIModels(Enum):
     GPT_4O_MINI = "gpt-4o-mini"
@@ -11,12 +40,6 @@ class OpenAIModels(Enum):
     GPT_4_TURBO = "gpt-4-turbo"
     GPT_4 = "gpt-4"
     GPT_35_TURBO = "gpt-35-turbo"
-
-
-class ClaudeModels(Enum):
-    CLAUDE_3_OPUS = "claude-3-opus-20240229"
-    CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
 
 
 def openai(
@@ -60,9 +83,21 @@ def openai(
     return chat_completion.choices[0].message.content
 
 
-def claude(
+#
+# Anthropic
+#
+
+
+class AnthropicModels(Enum):
+    CLAUDE_3_OPUS = "claude-3-opus-20240229"
+    CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
+    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
+
+
+
+def anthropic(
     user_input: str,
-    model_name: Union[ClaudeModels, str] = ClaudeModels.CLAUDE_3_HAIKU,
+    model_name: Union[AnthropicModels, str] = AnthropicModels.CLAUDE_3_SONNET,
     temperature: float = 0.0,
     max_tokens: int = 1000,
 ) -> str:
@@ -70,7 +105,7 @@ def claude(
 
     Args:
         user_input (str): The user input.
-        model_name (ClaudeModels, optional): The Claude model to use. Defaults to ClaudeModels.CLAUDE_3_HAIKU.value.
+        model_name (ClaudeModels, optional): The Claude model to use. Defaults to ClaudeModels.CLAUDE_3_SONNET.
         temperature (float, optional): The temperature. A temperature of 0.0 is deterministic. Defaults to 0.0.
         max_tokens (int, optional): The maximum number of tokens to generate. Defaults to 1000.
 
@@ -82,7 +117,7 @@ def claude(
         api_key=os.environ.get("ANTHROPIC_API_KEY"),
     )
 
-    if isinstance(model_name, ClaudeModels):
+    if isinstance(model_name, AnthropicModels):
         model_name = model_name.value
 
     message = client.messages.create(
