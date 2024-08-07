@@ -61,8 +61,6 @@ def get_config() -> dict:
     args = parser.parse_args()
     args_dict = vars(args)  # Convert to dictionary
 
-    print(args)
-
     # Merge config with command-line arguments, giving precedence to command-line args
     merged_config = {
         **config,
