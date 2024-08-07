@@ -1,15 +1,20 @@
 user_input: >
  You will receive code below.
- You must write unittests for the code.
+ You must write unit tests for the code.
+ If there are functions in the code that are helper functions,
+ you should not write tests for them.
+ Only write tests for the main functions.
 
  You must use a "scratchpad" at the top of your response
  to reason through the answer before writing the code.
  Every line in the scratchpad should be commented out.
  In your scratchpad, be sure to indicate what you are
- and are not  allowed to do in the code, based on the request.
- You are bad at arithmetic, and so have a hard time designing 
- numerically complicated test cases, so you should be sure to
- choose test cases that are numerically very simple.
+ doing, based on the request.
+ You will be computing matrix multiplications in your unit tests,
+ so you should first work out explicitly in the scratchpad
+ some verys simple examples like the multiplication
+ of a 2x2 idenity matrix with a random 2x2 matrix.
+ You should use those worked-out examples to write your tests.
  You should write a first draft of the code in the scratchpad
  that is commented out.
  Then look at your first draft for any errors or improvements
@@ -22,6 +27,10 @@ user_input: >
  ```
  Use pytest.
  Make sure the test covers all allowed types.
+ Note that pytest does not have a pytest.approx that works on 
+ nested lists, so you will need to write your own function to
+ compare nested lists.
+ The methods in the code can be imported from matrix_multiply.py.
 code_path: python/functional/methods/matrix_multiply.py
 output_tag: python/functional/methods/test_matrix_multiply.py
 model_name: claude-3-5-sonnet-20240620
