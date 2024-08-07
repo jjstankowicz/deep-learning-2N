@@ -5,8 +5,11 @@ user_input: >
  You must use a "scratchpad" at the top of your response
  to reason through the answer before writing the code.
  Every line in the scratchpad should be commented out.
- In your scratchpad, be sure to indicate what you are not
- allowed to do in the code, based on the request.
+ In your scratchpad, be sure to indicate what you are
+ and are not  allowed to do in the code, based on the request.
+ You are bad at arithmetic, and so have a hard time designing 
+ numerically complicated test cases, so you should be sure to
+ choose test cases that are numerically very simple.
  You should write a first draft of the code in the scratchpad
  that is commented out.
  Then look at your first draft for any errors or improvements
