@@ -1,80 +1,111 @@
 # Scratchpad
-# ----------------
-# I need to write unit tests for the provided matrix operations code.
-# The tests should cover the following functions: num_rows, num_cols, get_column, and matrix_multiply.
-# I will use pytest for the testing framework.
-# I need to ensure that I cover various scenarios, including:
-# - Normal cases with valid matrices
-# - Edge cases like empty matrices
-# - Cases that should raise exceptions (e.g., incompatible matrices for multiplication)
-# I cannot modify the original code, only write tests for it.
+# Let's start by working out some simple matrix multiplication examples:
+#
+# 1. Identity matrix (2x2) * Random matrix (2x2)
+# [[1, 0],   [[a, b],    [[a, b],
+#  [0, 1]] *  [c, d]] =   [c, d]]
+#
+# 2. Simple 2x2 matrices
+# [[1, 2],   [[5, 6],    [[1*5 + 2*7, 1*6 + 2*8],     [[19, 22],
+#  [3, 4]] *  [7, 8]] =   [3*5 + 4*7, 3*6 + 4*8]] =    [43, 50]]
+#
+# Now, let's draft our test code:
+#
+# import pytest
+# from typing import List, Union
+#
+# def compare_nested_lists(list1, list2, tolerance=1e-6):
+#     if isinstance(list1, (int, float)) and isinstance(list2, (int, float)):
+#         return abs(list1 - list2) < tolerance
+#     return all(compare_nested_lists(l1, l2, tolerance) for l1, l2 in zip(list1, list2))
+#
+# def test_matrix_multiply():
+#     # Test with integer matrices
+#     matrix1 = [[1, 2], [3, 4]]
+#     matrix2 = [[5, 6], [7, 8]]
+#     expected = [[19, 22], [43, 50]]
+#     assert matrix_multiply(matrix1, matrix2) == expected
+#
+#     # Test with float matrices
+#     matrix1 = [[1.0, 2.0], [3.0, 4.0]]
+#     matrix2 = [[5.0, 6.0], [7.0, 8.0]]
+#     expected = [[19.0, 22.0], [43.0, 50.0]]
+#     assert compare_nested_lists(matrix_multiply(matrix1, matrix2), expected)
+#
+#     # Test with mixed int and float matrices
+#     matrix1 = [[1, 2.0], [3, 4.0]]
+#     matrix2 = [[5.0, 6], [7.0, 8]]
+#     expected = [[19.0, 22.0], [43.0, 50.0]]
+#     assert compare_nested_lists(matrix_multiply(matrix1, matrix2), expected)
+#
+#     # Test with identity matrix
+#     identity = [[1, 0], [0, 1]]
+#     random_matrix = [[2, 3], [4, 5]]
+#     assert matrix_multiply(identity, random_matrix) == random_matrix
+#
+#     # Test invalid dimensions
+#     with pytest.raises(ValueError):
+#         matrix_multiply([[1, 2], [3, 4]], [[1, 2, 3], [4, 5, 6]])
+#
+# The draft looks good, but we should add a test for empty matrices and ensure we're testing all the main functions.
+# Let's write the final code:
 
-# First draft of the test code:
-"""
 import pytest
+from typing import List, Union
+from matrix_multiply import dot_product, get_column, matrix_multiply
 
-def test_num_rows():
-    assert num_rows([[1, 2], [3, 4]]) == 2
-    assert num_rows([[1]]) == 1
-    assert num_rows([]) == 0
+TensorData = Union[int, float]
+Tensor1D = List[TensorData]
+Tensor2D = List[Tensor1D]
 
-def test_num_cols():
-    assert num_cols([[1, 2], [3, 4]]) == 2
-    assert num_cols([[1], [2]]) == 1
-    assert num_cols([]) == 0
+
+def compare_nested_lists(list1, list2, tolerance=1e-6):
+    if isinstance(list1, (int, float)) and isinstance(list2, (int, float)):
+        return abs(list1 - list2) < tolerance
+    return all(compare_nested_lists(l1, l2, tolerance) for l1, l2 in zip(list1, list2))
+
+
+def test_dot_product():
+    assert dot_product([1, 2, 3], [4, 5, 6]) == 32
+    assert compare_nested_lists(dot_product([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]), 32.0)
+    assert compare_nested_lists(dot_product([1, 2.0, 3], [4.0, 5, 6.0]), 32.0)
+
 
 def test_get_column():
-    assert get_column([[1, 2], [3, 4]], 0) == [1, 3]
-    assert get_column([[1, 2], [3, 4]], 1) == [2, 4]
-    with pytest.raises(IndexError):
-        get_column([[1, 2]], 2)
-
-def test_matrix_multiply():
-    assert matrix_multiply([[1, 2]], [[3], [4]]) == [[11]]
-    assert matrix_multiply([[1, 2], [3, 4]], [[5, 6], [7, 8]]) == [[19, 22], [43, 50]]
-    with pytest.raises(ValueError):
-        matrix_multiply([[1, 2]], [[3, 4]])
-"""
-
-# Now I will review the first draft for any errors or improvements.
-# The tests seem to cover the necessary cases, but I should ensure that I also test for float types.
-# I will add additional tests for float inputs in the matrix_multiply function.
-# I will also ensure that the test names are descriptive and follow a consistent naming convention.
-
-# Final code below:
-import pytest
-from matrix_multiply import num_rows, num_cols, get_column, matrix_multiply
-
-
-def test_num_rows():
-    assert num_rows([[1, 2], [3, 4]]) == 2
-    assert num_rows([[1]]) == 1
-    assert num_rows([]) == 0
-
-
-def test_num_cols():
-    assert num_cols([[1, 2], [3, 4]]) == 2
-    assert num_cols([[1], [2]]) == 1
-    assert num_cols([]) == 0
-
-
-def test_get_column():
-    assert get_column([[1, 2], [3, 4]], 0) == [1, 3]
-    assert get_column([[1, 2], [3, 4]], 1) == [2, 4]
-    with pytest.raises(IndexError):
-        get_column([[1, 2]], 2)
+    matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    assert get_column(matrix, 0) == [1, 4, 7]
+    assert get_column(matrix, 1) == [2, 5, 8]
+    assert get_column(matrix, 2) == [3, 6, 9]
 
 
 def test_matrix_multiply():
-    assert matrix_multiply([[1, 2]], [[3], [4]]) == [[11]]
-    assert matrix_multiply([[1, 2], [3, 4]], [[5, 6], [7, 8]]) == [[19, 22], [43, 50]]
-    # Wrong numeric value
-    assert matrix_multiply([[1.5, 2.5]], [[3.5], [4.5]]) == [[16.5]]
-    assert matrix_multiply([[1.1, 2.2], [3.3, 4.4]], [[5.5, 6.6], [7.7, 8.8]]) == [
-        [26.99, 32.88],
-        [61.89, 74.76],
-    ]
+    # Test with integer matrices
+    matrix1 = [[1, 2], [3, 4]]
+    matrix2 = [[5, 6], [7, 8]]
+    expected = [[19, 22], [43, 50]]
+    assert matrix_multiply(matrix1, matrix2) == expected
+
+    # Test with float matrices
+    matrix1 = [[1.0, 2.0], [3.0, 4.0]]
+    matrix2 = [[5.0, 6.0], [7.0, 8.0]]
+    expected = [[19.0, 22.0], [43.0, 50.0]]
+    assert compare_nested_lists(matrix_multiply(matrix1, matrix2), expected)
+
+    # Test with mixed int and float matrices
+    matrix1 = [[1, 2.0], [3, 4.0]]
+    matrix2 = [[5.0, 6], [7.0, 8]]
+    expected = [[19.0, 22.0], [43.0, 50.0]]
+    assert compare_nested_lists(matrix_multiply(matrix1, matrix2), expected)
+
+    # Test with identity matrix
+    identity = [[1, 0], [0, 1]]
+    random_matrix = [[2, 3], [4, 5]]
+    assert matrix_multiply(identity, random_matrix) == random_matrix
+
+    # Test invalid dimensions
     with pytest.raises(ValueError):
-        matrix_multiply([[1, 2]], [[3, 4]])  # Incompatible dimensions
+        matrix_multiply([[1, 2], [3, 4]], [[1, 2, 3], [4, 5, 6]])
+
+    # Test empty matrices
     with pytest.raises(ValueError):
-        matrix_multiply([[1, 2, 3]], [[4], [5]])  # Incompatible dimensions
+        matrix_multiply([], [])
