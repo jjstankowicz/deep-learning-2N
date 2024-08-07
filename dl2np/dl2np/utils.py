@@ -2,6 +2,9 @@ from pathlib import Path
 import argparse
 import yaml
 
+import logging
+import logging.config
+
 
 def get_path() -> str:
     """Get the path of the current file.
@@ -68,3 +71,45 @@ def get_config() -> dict:
     }
 
     return merged_config
+
+
+# Set up logging with default level (INFO)
+def setup_logging(level=logging.INFO):
+    config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
+        },
+        "handlers": {
+            "default": {
+                "level": "DEBUG",  # Set to DEBUG to allow all levels
+                "formatter": "standard",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+            },
+            "file": {
+                "level": "DEBUG",  # Set to DEBUG to allow all levels
+                "formatter": "standard",
+                "class": "logging.FileHandler",
+                "filename": "dl2np.log",
+                "mode": "a",
+            },
+        },
+        "loggers": {
+            "dl2np": {  # root logger for the package
+                "handlers": ["default", "file"],
+                "level": level,
+                "propagate": True,
+            }
+        },
+    }
+    logging.config.dictConfig(config)
+
+
+def get_logger(name):
+    return logging.getLogger(name)
+
+
+# Enable  logging with default level (INFO)
+setup_logging()
