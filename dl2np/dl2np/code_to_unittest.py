@@ -1,5 +1,5 @@
 from pathlib import Path
-from dl2np.utils import get_path, remove_markdown_code_blocks
+from dl2np.utils import get_path, remove_markdown_code_blocks, remove_comments
 from dl2np.chatbots import chat
 
 
@@ -8,9 +8,7 @@ def create_prompt(user_input: str, code_path_str: str) -> str:
     code_path: Path = Path(get_path()).parent / f"{code_path_str}"
     code_str: str = Path(code_path).read_text()
     # Remove all comments from the code_str
-    code_str = "\n".join(
-        [line for line in code_str.split("\n") if not line.strip().startswith("#")]
-    )
+    code_str = remove_comments(code_str)
     return out.replace("{{ CODE_HERE }}", code_str)
 
 
