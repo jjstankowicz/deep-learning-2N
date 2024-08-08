@@ -29,6 +29,20 @@ def remove_markdown_code_blocks(text: str) -> str:
     return text.replace("```python", "").replace("```", "")
 
 
+# TODO: Generalize this function to remove comments from any language
+def remove_comments(text: str) -> str:
+    """
+    Remove all comments from a block of text.
+
+    Args:
+        text (str): The text to remove comments from.
+
+    Returns:
+        str: The text with comments removed.
+    """
+    return "\n".join([line for line in text.split("\n") if not line.strip().startswith("#")])
+
+
 # Get a configuration dictionary from a YAML file and command-line arguments.
 # The command-line arguments take precedence over the configuration file.
 def get_config() -> dict:
