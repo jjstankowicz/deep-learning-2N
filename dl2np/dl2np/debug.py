@@ -5,65 +5,79 @@ from dl2np.utils import get_path, remove_markdown_code_blocks, remove_comments
 import subprocess
 
 
-def create_prompt(
-    user_input: str,
-    code_path_str: str,
-    test_path: str,
-    test_result_path: str,
-) -> str:
-    out: str = user_input
-    # Code str
-    code_path: Path = Path(get_path()).parent / f"{code_path_str}"
-    code_str: str = Path(code_path).read_text()
-    code_str = remove_comments(code_str)  # Remove comments
-    # Test str
-    test_path: Path = Path(get_path()).parent / f"{test_path}"
-    test_str: str = Path(test_path).read_text()
-    test_str = remove_comments(test_str)  # Remove comments
-    # Test result str
-    test_result_path: Path = Path(get_path()).parent / f"{test_result_path}"
-    test_result_str: str = test_result_path.read_text()
-    out = out.replace("{{ CODE_HERE }}", code_str)
-    out = out.replace("{{ TEST_HERE }}", test_str)
-    out = out.replace("{{ TEST_RESULT_HERE }}", test_result_str)
-    return out
+class Debugger:
+    def __init__(self, code_filename: str, test_filename: str):
+        self.code_filename = code_filename
+        self.test_filename = test_filename
 
+    def _check_attributes(self) -> None:
+        if not hasattr(self, "user_input"):
+            raise AttributeError("Please set the user_input attribute before calling this method.")
+        if not hasattr(self, "test_filename"):
+            raise AttributeError(
+                "Please set the test_filename attribute before calling this method."
+            )
+        if not hasattr(self, "test_result_str"):
+            raise AttributeError(
+                "Please set the test_result_str attribute before calling this method."
+            )
 
-def get_test_result(test_filename: str) -> tuple[bool, str]:
-    """Run the pytest on the specified test file and return the result.
+    def set_prompt(self) -> None:
+        self._check_attributes()
+        out: str = self.user_input
+        # Code str
+        code_path: Path = Path(get_path()).parent / self.code_filename
+        code_str: str = Path(code_path).read_text()
+        self.code_str = remove_comments(code_str)  # Remove comments
+        # Test str
+        test_path: Path = Path(get_path()).parent / self.test_filename
+        test_str: str = Path(test_path).read_text()
+        self.test_str = remove_comments(test_str)  # Remove comments
+        out = out.replace("{{ CODE_HERE }}", code_str)
+        out = out.replace("{{ TEST_HERE }}", test_str)
+        out = out.replace("{{ TEST_RESULT_HERE }}", self.test_result_str)
+        self.prompt = out
 
-    Args:
-        test_filename (str): The name of the test file.
+    def set_test_result(self) -> None:
+        """Run the pytest on the specified test file and return the result.
 
-    Returns:
-        tuple[bool, str]: A tuple containing:
-            - A boolean indicating whether the test passed (True) or failed (False)
-            - The error output as a string if the test failed, or an empty string if it passed
-    """
-    result = subprocess.run(["pytest", test_filename, "-v"], capture_output=True, text=True)
+        Args:
+            test_filename (str): The name of the test file.
 
-    if result.returncode == 0:
-        return True, ""
-    else:
-        return False, result.stdout + result.stderr
+        Returns:
+            tuple[bool, str]: A tuple containing:
+                - A boolean indicating whether the test passed (True) or failed (False)
+                - The error output as a string if the test failed, or an empty string if it passed
+        """
+        result = subprocess.run(
+            ["pytest", self.test_filename, "-v"], capture_output=True, text=True
+        )
 
+        if result.returncode == 0:
+            self.test_result = {"passed": True, "error": ""}
+        else:
+            self.test_result = {"passed": False, "error": result.stdout + result.stderr}
 
-def run(
-    # user_input: str,
-    # code_path: str,
-    test_path: str,
-    # output_tag: str,
-    # model_name: str = "gpt-4o-mini",
-):
-    failing_test = True
-    while failing_test:
-        # 1. Get the test result and error message
-        test_result, test_result_str = get_test_result(test_path)
-        failing_test = not test_result
-        breakpoint()
-        # if failing_test:
-        #     # 2. Modify the code and test
-        #     modify_code_and_test(user_input, code_path, test_path, output_tag, model_name)
-        # else:
-        #     # 3. If the test passed, save the code and test
-        #     save_code_and_test(user_input, code_path, test_path, output_tag)
+    def modify_code_and_test(self):
+        self.set_prompt()
+
+    def run(
+        self,
+        # user_input: str,
+        # code_path: str,
+        # model_name: str = "gpt-4o-mini",
+    ):
+        failing_test = True
+        while failing_test:
+            # 1. Get the test result and error message
+            self.set_test_result()
+            test_result = self.test_result["passed"]
+            self.test_result_str = self.test_result["error"]
+            failing_test = not test_result
+            breakpoint()
+            # if failing_test:
+            #     # 2. Modify the code and test
+            #     modify_code_and_test(user_input, code_path, test_path, output_tag, model_name)
+            # else:
+            #     # 3. If the test passed, save the code and test
+            #     save_code_and_test(user_input, code_path, test_path, output_tag)
