@@ -1,5 +1,4 @@
 user_input: >
  Nothing for now
-output_tag: python/functional/methods/matrix_multiply
+tag: python/functional/methods/matrix_multiply
 model_name: claude-3-5-sonnet-20240620
-test_path: python/functional/methods/test_matrix_multiply.py

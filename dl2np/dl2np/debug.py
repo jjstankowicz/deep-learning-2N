@@ -6,9 +6,18 @@ import subprocess
 
 
 class Debugger:
-    def __init__(self, code_filename: str, test_filename: str):
-        self.code_filename = code_filename
-        self.test_filename = test_filename
+    def __init__(self, tag: str):
+        self.tag: str = tag
+        self.parse_tag()
+
+    def parse_tag(self) -> None:
+        self.tag_str: str = self.tag
+        self.tag_full: Path = Path(get_path()).parent / f"{self.tag}"
+        self.tag_name: str = self.tag_full.name
+        self.tag_parent: Path = self.tag_full.parent
+        self.code_filename = self.tag_full.with_suffix(".py")
+        self.test_filename = self.tag_parent / f"test_{self.tag_name}"
+        self.test_filename = self.test_filename.with_suffix(".py")
 
     def _check_attributes(self) -> None:
         if not hasattr(self, "user_input"):
@@ -81,3 +90,8 @@ class Debugger:
             # else:
             #     # 3. If the test passed, save the code and test
             #     save_code_and_test(user_input, code_path, test_path, output_tag)
+
+
+def run(tag: str, model_name: str = "gpt-4o-mini") -> None:
+    debugger = Debugger(tag=tag)
+    debugger.run()
