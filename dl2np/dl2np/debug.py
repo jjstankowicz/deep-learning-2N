@@ -1,14 +1,17 @@
 from pathlib import Path
 from dl2np.utils import get_path, remove_markdown_code_blocks, remove_comments
+from dl2np.chatbots import chat
 
 # from dl2np.chatbots import chat
 import subprocess
 
 
 class Debugger:
-    def __init__(self, tag: str):
+    def __init__(self, tag: str, model_name: str) -> None:
         self.tag: str = tag
         self.parse_tag()
+        self.model_name: str = model_name
+        self.divider_string = "----------"
 
     def parse_tag(self) -> None:
         self.tag_str: str = self.tag
@@ -42,9 +45,10 @@ class Debugger:
         test_path: Path = Path(get_path()).parent / self.test_filename
         test_str: str = Path(test_path).read_text()
         self.test_str = remove_comments(test_str)  # Remove comments
-        out = out.replace("{{ CODE_HERE }}", code_str)
-        out = out.replace("{{ TEST_HERE }}", test_str)
-        out = out.replace("{{ TEST_RESULT_HERE }}", self.test_result_str)
+        out = out.replace("{{ DIVIDER_STRING }}", self.divider_string)
+        out = out.replace("{{ CODE_TEXT }}", self.code_str)
+        out = out.replace("{{ TEST_TEXT }}", self.test_str)
+        out = out.replace("{{ TEST_RESULT_TEXT }}", self.test_result_str)
         self.prompt = out
 
     def set_test_result(self) -> None:
@@ -67,15 +71,24 @@ class Debugger:
         else:
             self.test_result = {"passed": False, "error": result.stdout + result.stderr}
 
+    def update_code_and_test(self) -> None:
+        """Update the code and test files with the response from the chatbot."""
+        _, scratch, code, test = self.response.split(self.divider_string)
+        self.scratch = scratch
+        self.code_str = remove_markdown_code_blocks(code)
+        self.test_str = remove_markdown_code_blocks(test)
+        breakpoint()
+
     def modify_code_and_test(self):
         self.set_prompt()
+        self.response = chat(self.prompt, model_name=self.model_name)
+        self.update_code_and_test()
 
     def run(
         self,
-        # user_input: str,
-        # code_path: str,
-        # model_name: str = "gpt-4o-mini",
+        user_input: str,
     ):
+        self.user_input = user_input
         failing_test = True
         while failing_test:
             # 1. Get the test result and error message
@@ -83,15 +96,18 @@ class Debugger:
             test_result = self.test_result["passed"]
             self.test_result_str = self.test_result["error"]
             failing_test = not test_result
-            breakpoint()
-            # if failing_test:
-            #     # 2. Modify the code and test
-            #     modify_code_and_test(user_input, code_path, test_path, output_tag, model_name)
+            if failing_test:
+                # 2. Modify the code and test
+                self.modify_code_and_test()
+                breakpoint()
             # else:
             #     # 3. If the test passed, save the code and test
             #     save_code_and_test(user_input, code_path, test_path, output_tag)
 
 
-def run(tag: str, model_name: str = "gpt-4o-mini") -> None:
-    debugger = Debugger(tag=tag)
-    debugger.run()
+def run(user_input: str, tag: str, model_name: str = "gpt-4o-mini") -> str:
+    debugger = Debugger(tag=tag, model_name=model_name)
+    debugger.run(user_input=user_input)
+    response = debugger.response
+    breakpoint()
+    return response

@@ -1,4 +1,49 @@
 user_input: >
- Nothing for now
+ You will be given python code,
+ a pytest that tests the code,
+ and the result of the test.
+ You should fix the code and fix the test
+ so that the test passes.
+ 
+ Your response should contain three sections:
+ - A "scratchpad_result". Here you reason about the code and the test.
+ You should create a detailed outline to fix the code and the test,
+ based explicitly on the code and the test provided.
+ - A "code_result" section where you provide the corrected code.
+ - A "test_result" section where you provide the corrected test.
+ You should structure the format as follows:
+
+ ```txt
+ {{ DIVIDER_STRING }}
+  ## scratchpad_result ##
+  # Your reasoning here
+ {{ DIVIDER_STRING }}
+  ## code_result ##
+  ```python
+  # Your corrected code here
+  ```
+ {{ DIVIDER_STRING }}
+  ## test_result ##
+  ```python
+  # Your corrected test here
+  ```
+ ```
+
+ The input code, test, and test result are:
+ 
+ Code:
+ ```python
+ {{ CODE_TEXT }}
+ ```
+ 
+ Test:
+ ```python
+ {{ TEST_TEXT }}
+ ```
+
+ Test result:
+ ```txt
+ {{ TEST_RESULT_TEXT }}
+ ```
 tag: python/functional/methods/matrix_multiply
 model_name: claude-3-5-sonnet-20240620
